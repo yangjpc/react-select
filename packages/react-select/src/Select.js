@@ -201,6 +201,8 @@ export type Props = {
   noOptionsMessage: ({ inputValue: string }) => Node | null,
   /* Handle blur events on the control */
   onBlur?: FocusEventHandler,
+
+  onBlurResetsInput?: boolean,
   /* Handle change events on the select */
   onChange: (ValueType, ActionMeta) => void,
   /* Handle focus events on the control */
@@ -265,6 +267,7 @@ export const defaultProps = {
   isMulti: false,
   isRtl: false,
   isSearchable: true,
+  onBlurResetsInput: false,
   isOptionDisabled: isOptionDisabled,
   loadingMessage: () => 'Loading...',
   maxMenuHeight: 300,
@@ -1132,12 +1135,19 @@ export default class Select extends Component<Props, State> {
     if (this.props.onBlur) {
       this.props.onBlur(event);
     }
-    this.onInputChange('', { action: 'input-blur' });
+    if (this.props.onBlurResetsInput) {
+      this.onInputChange('', { action: 'input-blur' });
+      this.setState({
+        focusedValue: null,
+        isFocused: false,
+      });
+    } else {
+      this.setState({
+        isFocused: false
+      });
+    }
     this.onMenuClose();
-    this.setState({
-      focusedValue: null,
-      isFocused: false,
-    });
+
   };
   onOptionHover = (focusedOption: OptionType) => {
     if (this.blockOptionHover || this.state.focusedOption === focusedOption) {
